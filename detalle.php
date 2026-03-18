@@ -22,7 +22,9 @@ if (!$licitacion) {
     die("Licitación no encontrada o no disponible temporalmente.");
 }
 
-$pdf_path = APP_URL . '/uploads/pdfs/' . $licitacion['pdf_principal'];
+$pdf_bases = APP_URL . '/uploads/pdfs/' . $licitacion['pdf_bases'];
+$pdf_presentacion = APP_URL . '/uploads/pdfs/' . $licitacion['pdf_presentacion'];
+$pdf_fallo = APP_URL . '/uploads/pdfs/' . $licitacion['pdf_fallo'];
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -123,35 +125,70 @@ $pdf_path = APP_URL . '/uploads/pdfs/' . $licitacion['pdf_principal'];
                     </div>
                 </div>
 
-                <div class="bg-blue-50 p-6 rounded-lg shadow-sm mt-auto border border-blue-100 text-center">
-                    <h3 class="text-lg font-bold text-tjaech mb-2">Bases de la Licitación</h3>
-                    <p class="text-sm text-gray-600 mb-4">Descargue el documento oficial con las bases y lineamientos del procedimiento.</p>
-                    <a href="<?php echo $pdf_path; ?>" download class="inline-flex w-full items-center justify-center py-3 px-4 bg-tjaech text-white font-medium rounded shadow hover:bg-blue-800 transition">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                        Descargar PDF
-                    </a>
+                <div class="space-y-4 mt-auto">
+                    <div class="bg-blue-50 p-4 rounded-lg shadow-sm border border-blue-100 flex flex-col hover:bg-blue-100 transition">
+                        <h4 class="font-bold text-tjaech text-sm mb-1">Bases de la Licitación</h4>
+                        <div class="flex justify-between items-center text-sm">
+                            <button onclick="setPdfViewer('<?php echo $pdf_bases; ?>', 'Bases de la Licitación')" class="text-blue-700 hover:underline font-medium">Ver en línea</button>
+                            <a href="<?php echo $pdf_bases; ?>" download class="text-gray-600 hover:text-black font-semibold flex items-center">
+                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                Descargar
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="bg-blue-50 p-4 rounded-lg shadow-sm border border-blue-100 flex flex-col hover:bg-blue-100 transition">
+                        <h4 class="font-bold text-tjaech text-sm mb-1">Acta de Presentación</h4>
+                        <div class="flex justify-between items-center text-sm">
+                            <button onclick="setPdfViewer('<?php echo $pdf_presentacion; ?>', 'Acta de Presentación de Propuestas')" class="text-blue-700 hover:underline font-medium">Ver en línea</button>
+                            <a href="<?php echo $pdf_presentacion; ?>" download class="text-gray-600 hover:text-black font-semibold flex items-center">
+                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                Descargar
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="bg-blue-50 p-4 rounded-lg shadow-sm border border-blue-100 flex flex-col hover:bg-blue-100 transition">
+                        <h4 class="font-bold text-tjaech text-sm mb-1">Acta de Fallo</h4>
+                        <div class="flex justify-between items-center text-sm">
+                            <button onclick="setPdfViewer('<?php echo $pdf_fallo; ?>', 'Acta de Fallo')" class="text-blue-700 hover:underline font-medium">Ver en línea</button>
+                            <a href="<?php echo $pdf_fallo; ?>" download class="text-gray-600 hover:text-black font-semibold flex items-center">
+                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                Descargar
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </div>
 
             <!-- Main Content PDF Viewer -->
             <div class="lg:col-span-2 bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden flex flex-col h-[600px] lg:h-auto min-h-[600px]">
                 <div class="px-6 py-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center shrink-0">
-                    <h3 class="font-bold text-gray-800 flex items-center">
+                    <h3 class="font-bold text-gray-800 flex items-center" id="viewer-title">
                         <svg class="w-5 h-5 text-red-500 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd"></path></svg>
-                        Documento Principal
+                        Bases de la Licitación
                     </h3>
-                    <a href="<?php echo $pdf_path; ?>" target="_blank" class="text-sm text-blue-600 hover:text-blue-800 hover:underline">Abrir en nueva pestaña</a>
+                    <a href="<?php echo $pdf_bases; ?>" id="viewer-new-tab" target="_blank" class="text-sm text-blue-600 hover:text-blue-800 hover:underline">Abrir en nueva pestaña</a>
                 </div>
                 <!-- Native Browser PDF Embedding -->
                 <div class="flex-grow w-full bg-gray-200 relative">
-                    <object data="<?php echo $pdf_path; ?>" type="application/pdf" width="100%" height="100%" class="absolute inset-0 w-full h-full">
+                    <object id="pdf-object" data="<?php echo $pdf_bases; ?>" type="application/pdf" width="100%" height="100%" class="absolute inset-0 w-full h-full">
                         <div class="flex flex-col items-center justify-center p-8 h-full bg-white text-center">
                             <p class="text-gray-500 mb-4">El navegador no soporta la visualización de PDFs en línea.</p>
-                            <a href="<?php echo $pdf_path; ?>" class="text-tjaech font-medium hover:underline">Pulsar aquí para descargar el PDF</a>
+                            <a id="pdf-fallback" href="<?php echo $pdf_bases; ?>" class="text-tjaech font-medium hover:underline">Pulsar aquí para descargar el PDF</a>
                         </div>
                     </object>
                 </div>
             </div>
+            
+            <script>
+                function setPdfViewer(url, title) {
+                    document.getElementById('pdf-object').setAttribute('data', url);
+                    document.getElementById('viewer-title').innerHTML = '<svg class="w-5 h-5 text-red-500 mr-2 inline" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd"></path></svg> ' + title;
+                    document.getElementById('viewer-new-tab').href = url;
+                    document.getElementById('pdf-fallback').href = url;
+                }
+            </script>
         </div>
     </main>
 

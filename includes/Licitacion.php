@@ -14,7 +14,8 @@ class Licitacion {
         $query = "INSERT INTO " . $this->table_name . "
                   SET numero_licitacion=:num, titulo=:tit, descripcion=:desc, 
                       tipo_procedimiento=:tipo, anio=:anio, fecha_publicacion=:f_pub, 
-                      fecha_limite=:f_lim, area_responsable=:area, pdf_principal=:pdf,
+                      fecha_limite=:f_lim, area_responsable=:area, pdf_bases=:pdf_bases,
+                      pdf_presentacion=:pdf_presentacion, pdf_fallo=:pdf_fallo,
                       slug=:slug, estatus=:est, creado_por=:creador";
 
         $stmt = $this->conn->prepare($query);
@@ -27,7 +28,9 @@ class Licitacion {
         $stmt->bindParam(':f_pub', $datos['fecha_publicacion']);
         $stmt->bindParam(':f_lim', $datos['fecha_limite']);
         $stmt->bindParam(':area', $datos['area_responsable']);
-        $stmt->bindParam(':pdf', $datos['pdf_principal']);
+        $stmt->bindParam(':pdf_bases', $datos['pdf_bases']);
+        $stmt->bindParam(':pdf_presentacion', $datos['pdf_presentacion']);
+        $stmt->bindParam(':pdf_fallo', $datos['pdf_fallo']);
         $stmt->bindParam(':slug', $datos['slug']);
         $stmt->bindParam(':est', $datos['estatus']);
         $stmt->bindParam(':creador', $datos['creado_por']);
@@ -49,7 +52,9 @@ class Licitacion {
         if (isset($datos['numero_licitacion'])) $query .= ", numero_licitacion=:num";
         if (isset($datos['anio'])) $query .= ", anio=:anio";
         if (isset($datos['slug'])) $query .= ", slug=:slug";
-        if (isset($datos['pdf_principal'])) $query .= ", pdf_principal=:pdf";
+        if (isset($datos['pdf_bases'])) $query .= ", pdf_bases=:pdf_bases";
+        if (isset($datos['pdf_presentacion'])) $query .= ", pdf_presentacion=:pdf_presentacion";
+        if (isset($datos['pdf_fallo'])) $query .= ", pdf_fallo=:pdf_fallo";
 
         $query .= " WHERE id=:id";
 
@@ -68,7 +73,9 @@ class Licitacion {
         if (isset($datos['numero_licitacion'])) $stmt->bindParam(':num', $datos['numero_licitacion']);
         if (isset($datos['anio'])) $stmt->bindParam(':anio', $datos['anio']);
         if (isset($datos['slug'])) $stmt->bindParam(':slug', $datos['slug']);
-        if (isset($datos['pdf_principal'])) $stmt->bindParam(':pdf', $datos['pdf_principal']);
+        if (isset($datos['pdf_bases'])) $stmt->bindParam(':pdf_bases', $datos['pdf_bases']);
+        if (isset($datos['pdf_presentacion'])) $stmt->bindParam(':pdf_presentacion', $datos['pdf_presentacion']);
+        if (isset($datos['pdf_fallo'])) $stmt->bindParam(':pdf_fallo', $datos['pdf_fallo']);
 
         return $stmt->execute();
     }

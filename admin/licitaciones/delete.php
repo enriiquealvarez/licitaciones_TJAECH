@@ -21,9 +21,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $licitacion = $licitacionObj->leerUnico($id);
         
         if ($licitacion) {
-            // Eliminar archivo físico
-            if (!empty($licitacion['pdf_principal']) && file_exists(UPLOAD_DIR . $licitacion['pdf_principal'])) {
-                unlink(UPLOAD_DIR . $licitacion['pdf_principal']);
+            // Eliminar archivos físicos
+            $archivos = ['pdf_bases', 'pdf_presentacion', 'pdf_fallo'];
+            foreach ($archivos as $campo) {
+                if (!empty($licitacion[$campo]) && file_exists(UPLOAD_DIR . $licitacion[$campo])) {
+                    unlink(UPLOAD_DIR . $licitacion[$campo]);
+                }
             }
             
             if ($licitacionObj->eliminar($id)) {

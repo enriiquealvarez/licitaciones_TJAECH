@@ -34,39 +34,49 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = "El número de licitación ya existe en el sistema.";
     }
 
-    $pdf_principal = '';
-    // Procesar archivo
-    if (empty($error)) {
-        if (isset($_FILES['pdf_principal']) && $_FILES['pdf_principal']['error'] === UPLOAD_ERR_OK) {
-            $file_tmp = $_FILES['pdf_principal']['tmp_name'];
-            $file_name = $_FILES['pdf_principal']['name'];
-            $file_size = $_FILES['pdf_principal']['size'];
-            $file_ext = strtolower(pathinfo($file_name, PATHINFO_EXTENSION));
-            
-            // Validar MIME typo
-            $finfo = finfo_open(FILEINFO_MIME_TYPE);
-            $mime_type = finfo_file($finfo, $file_tmp);
-            finfo_close($finfo);
+    $archivos_pdf = [
+        'pdf_bases' => 'Bases de la Licitación',
+        'pdf_presentacion' => 'Acta de Presentación de Propuestas',
+        'pdf_fallo' => 'Acta de Fallo'
+    ];
+    $pdfs_subidos = [
+        'pdf_bases' => '',
+        'pdf_presentacion' => '',
+        'pdf_fallo' => ''
+    ];
 
-            if ($file_ext !== 'pdf' || $mime_type !== 'application/pdf') {
-                $error = "El archivo principal debe ser un documento PDF válido.";
-            } else {
-                // Generar nombre unico
-                $new_filename = uniqid('lic_', true) . '.pdf';
-                // Asegurar que exista el directorio
-                if (!is_dir(UPLOAD_DIR)) {
-                    mkdir(UPLOAD_DIR, 0755, true);
-                }
+    if (empty($error)) {
+        foreach ($archivos_pdf as $campo => $nombre_legible) {
+            if (isset($_FILES[$campo]) && $_FILES[$campo]['error'] === UPLOAD_ERR_OK) {
+                $file_tmp = $_FILES[$campo]['tmp_name'];
+                $file_name = $_FILES[$campo]['name'];
+                $file_ext = strtolower(pathinfo($file_name, PATHINFO_EXTENSION));
                 
-                if (move_uploaded_file($file_tmp, UPLOAD_DIR . $new_filename)) {
-                    $pdf_principal = $new_filename;
+                $finfo = finfo_open(FILEINFO_MIME_TYPE);
+                $mime_type = finfo_file($finfo, $file_tmp);
+                finfo_close($finfo);
+
+                if ($file_ext !== 'pdf' || $mime_type !== 'application/pdf') {
+                    $error = "El archivo para $nombre_legible debe ser un documento PDF válido.";
+                    break;
                 } else {
-                    $error = "Error al subir el archivo PDF.";
+                    $new_filename = uniqid('lic_' . $campo . '_', true) . '.pdf';
+                    if (!is_dir(UPLOAD_DIR)) {
+                        mkdir(UPLOAD_DIR, 0755, true);
+                    }
+                    
+                    if (move_uploaded_file($file_tmp, UPLOAD_DIR . $new_filename)) {
+                        $pdfs_subidos[$campo] = $new_filename;
+                    } else {
+                        $error = "Error al subir el archivo $nombre_legible.";
+                        break;
+                    }
                 }
-            }
-        } else {
-            if ($estatus === 'publicado') {
-                $error = "No puede publicar una licitación sin su PDF principal.";
+            } else {
+                if ($estatus === 'publicado') {
+                    $error = "No puede publicar una licitación sin el archivo: $nombre_legible.";
+                    break;
+                }
             }
         }
     }
@@ -90,7 +100,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'fecha_publicacion' => $fecha_publicacion,
             'fecha_limite' => $fecha_limite,
             'area_responsable' => $area_responsable,
-            'pdf_principal' => $pdf_principal,
+            'pdf_bases' => $pdfs_subidos['pdf_bases'],
+            'pdf_presentacion' => $pdfs_subidos['pdf_presentacion'],
+            'pdf_fallo' => $pdfs_subidos['pdf_fallo'],
             'slug' => $slug,
             'estatus' => $estatus,
             'creado_por' => $_SESSION['user_id']
@@ -178,23 +190,56 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <textarea name="descripcion" rows="3" class="w-full rounded-md border-gray-300 shadow-sm focus:border-tjaech focus:ring-tjaech p-2 border"><?php echo htmlspecialchars($_POST['descripcion'] ?? ''); ?></textarea>
         </div>
 
-        <!-- PDF Principal -->
-        <div class="md:col-span-2">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Bases / PDF Principal</label>
-            <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md bg-gray-50 hover:bg-gray-100 transition cursor-pointer" onclick="document.getElementById('pdf_principal').click()">
-                <div class="space-y-1 text-center">
-                    <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
-                        <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                    </svg>
-                    <div class="flex text-sm text-gray-600 justify-center">
-                        <label for="pdf_principal" class="relative cursor-pointer bg-white rounded-md font-medium text-tjaech hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-tjaech p-1">
-                            <span>Subir un archivo</span>
-                            <input id="pdf_principal" name="pdf_principal" type="file" class="sr-only" accept=".pdf">
-                        </label>
-                        <p class="pl-1 pt-1">o arrastrar y soltar</p>
+        <!-- Archivos PDF -->
+        <div class="md:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-4">
+            <!-- Bases de Licitación -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Bases de la Licitación</label>
+                <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md bg-gray-50 hover:bg-gray-100 transition cursor-pointer" onclick="document.getElementById('pdf_bases').click()">
+                    <div class="space-y-1 text-center">
+                        <svg class="mx-auto h-8 w-8 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true"><path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                        <div class="flex text-sm text-gray-600 justify-center">
+                            <label for="pdf_bases" class="relative cursor-pointer bg-white rounded-md font-medium text-tjaech hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-tjaech p-1">
+                                <span>Subir PDF</span>
+                                <input id="pdf_bases" name="pdf_bases" type="file" class="sr-only" accept=".pdf">
+                            </label>
+                        </div>
+                        <p id="file-name-display-bases" class="text-xs text-green-600 font-semibold mt-2 hidden truncate w-32 mx-auto"></p>
                     </div>
-                    <p class="text-xs text-gray-500">Solo PDF</p>
-                    <p id="file-name-display" class="text-sm text-green-600 font-semibold mt-2 hidden"></p>
+                </div>
+            </div>
+
+            <!-- Acta de Presentación -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Acta de Presentación</label>
+                <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md bg-gray-50 hover:bg-gray-100 transition cursor-pointer" onclick="document.getElementById('pdf_presentacion').click()">
+                    <div class="space-y-1 text-center">
+                        <svg class="mx-auto h-8 w-8 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true"><path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                        <div class="flex text-sm text-gray-600 justify-center">
+                            <label for="pdf_presentacion" class="relative cursor-pointer bg-white rounded-md font-medium text-tjaech hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-tjaech p-1">
+                                <span>Subir PDF</span>
+                                <input id="pdf_presentacion" name="pdf_presentacion" type="file" class="sr-only" accept=".pdf">
+                            </label>
+                        </div>
+                        <p id="file-name-display-presentacion" class="text-xs text-green-600 font-semibold mt-2 hidden truncate w-32 mx-auto"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Acta de Fallo -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Acta de Fallo</label>
+                <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md bg-gray-50 hover:bg-gray-100 transition cursor-pointer" onclick="document.getElementById('pdf_fallo').click()">
+                    <div class="space-y-1 text-center">
+                        <svg class="mx-auto h-8 w-8 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true"><path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                        <div class="flex text-sm text-gray-600 justify-center">
+                            <label for="pdf_fallo" class="relative cursor-pointer bg-white rounded-md font-medium text-tjaech hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-tjaech p-1">
+                                <span>Subir PDF</span>
+                                <input id="pdf_fallo" name="pdf_fallo" type="file" class="sr-only" accept=".pdf">
+                            </label>
+                        </div>
+                        <p id="file-name-display-fallo" class="text-xs text-green-600 font-semibold mt-2 hidden truncate w-32 mx-auto"></p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -227,16 +272,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </form>
 
 <script>
-    document.getElementById('pdf_principal').addEventListener('change', function(e) {
-        var fileName = e.target.files[0] ? e.target.files[0].name : '';
-        var display = document.getElementById('file-name-display');
-        if (fileName) {
-            display.textContent = 'Archivo seleccionado: ' + fileName;
-            display.classList.remove('hidden');
-        } else {
-            display.classList.add('hidden');
-        }
-    });
+    function setupFileInput(id, displayId) {
+        document.getElementById(id).addEventListener('change', function(e) {
+            var fileName = e.target.files[0] ? e.target.files[0].name : '';
+            var display = document.getElementById(displayId);
+            if (fileName) {
+                display.textContent = fileName;
+                display.classList.remove('hidden');
+            } else {
+                display.classList.add('hidden');
+            }
+        });
+    }
+
+    setupFileInput('pdf_bases', 'file-name-display-bases');
+    setupFileInput('pdf_presentacion', 'file-name-display-presentacion');
+    setupFileInput('pdf_fallo', 'file-name-display-fallo');
 
     // Mantener estado del select
     <?php if (isset($_POST['tipo_procedimiento'])): ?>

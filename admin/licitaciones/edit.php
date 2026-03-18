@@ -43,36 +43,54 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = "El número de licitación ya existe en el sistema en otro registro.";
     }
 
-    $pdf_principal = $licitacion['pdf_principal'];
+    $archivos_pdf = [
+        'pdf_bases' => 'Bases de la Licitación',
+        'pdf_presentacion' => 'Acta de Presentación de Propuestas',
+        'pdf_fallo' => 'Acta de Fallo'
+    ];
     
-    // Procesar nuevo archivo si se sube
-    if (empty($error) && isset($_FILES['pdf_principal']) && $_FILES['pdf_principal']['error'] === UPLOAD_ERR_OK) {
-        $file_tmp = $_FILES['pdf_principal']['tmp_name'];
-        $file_name = $_FILES['pdf_principal']['name'];
-        $file_ext = strtolower(pathinfo($file_name, PATHINFO_EXTENSION));
-        
-        $finfo = finfo_open(FILEINFO_MIME_TYPE);
-        $mime_type = finfo_file($finfo, $file_tmp);
-        finfo_close($finfo);
+    $pdfs_finales = [
+        'pdf_bases' => $licitacion['pdf_bases'],
+        'pdf_presentacion' => $licitacion['pdf_presentacion'],
+        'pdf_fallo' => $licitacion['pdf_fallo']
+    ];
+    
+    // Procesar nuevos archivos si se suben
+    if (empty($error)) {
+        foreach ($archivos_pdf as $campo => $nombre_legible) {
+            if (isset($_FILES[$campo]) && $_FILES[$campo]['error'] === UPLOAD_ERR_OK) {
+                $file_tmp = $_FILES[$campo]['tmp_name'];
+                $file_name = $_FILES[$campo]['name'];
+                $file_ext = strtolower(pathinfo($file_name, PATHINFO_EXTENSION));
+                
+                $finfo = finfo_open(FILEINFO_MIME_TYPE);
+                $mime_type = finfo_file($finfo, $file_tmp);
+                finfo_close($finfo);
 
-        if ($file_ext !== 'pdf' || $mime_type !== 'application/pdf') {
-            $error = "El archivo principal debe ser un documento PDF válido.";
-        } else {
-            $new_filename = uniqid('lic_', true) . '.pdf';
-            if (move_uploaded_file($file_tmp, UPLOAD_DIR . $new_filename)) {
-                // Borrar archivo anterior si existe
-                if (!empty($licitacion['pdf_principal']) && file_exists(UPLOAD_DIR . $licitacion['pdf_principal'])) {
-                    unlink(UPLOAD_DIR . $licitacion['pdf_principal']);
+                if ($file_ext !== 'pdf' || $mime_type !== 'application/pdf') {
+                    $error = "El archivo para $nombre_legible debe ser un documento PDF válido.";
+                    break;
+                } else {
+                    $new_filename = uniqid('lic_' . $campo . '_', true) . '.pdf';
+                    if (move_uploaded_file($file_tmp, UPLOAD_DIR . $new_filename)) {
+                        // Borrar archivo anterior si existe
+                        if (!empty($licitacion[$campo]) && file_exists(UPLOAD_DIR . $licitacion[$campo])) {
+                            unlink(UPLOAD_DIR . $licitacion[$campo]);
+                        }
+                        $pdfs_finales[$campo] = $new_filename;
+                    } else {
+                        $error = "Error al subir el nuevo archivo $nombre_legible.";
+                        break;
+                    }
                 }
-                $pdf_principal = $new_filename;
-            } else {
-                $error = "Error al subir el nuevo archivo PDF.";
             }
         }
     }
 
-    if (empty($error) && empty($pdf_principal) && $estatus === 'publicado') {
-        $error = "No puede publicar una licitación sin su PDF principal.";
+    if (empty($error) && $estatus === 'publicado') {
+        if (empty($pdfs_finales['pdf_bases']) || empty($pdfs_finales['pdf_presentacion']) || empty($pdfs_finales['pdf_fallo'])) {
+            $error = "No puede publicar una licitación sin sus 3 documentos PDF obligatorios.";
+        }
     }
 
     if (empty($error)) {
@@ -85,7 +103,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'fecha_publicacion' => $fecha_publicacion,
             'fecha_limite' => $fecha_limite,
             'area_responsable' => $area_responsable,
-            'pdf_principal' => $pdf_principal,
+            'pdf_bases' => $pdfs_finales['pdf_bases'],
+            'pdf_presentacion' => $pdfs_finales['pdf_presentacion'],
+            'pdf_fallo' => $pdfs_finales['pdf_fallo'],
             'estatus' => $estatus,
             'actualizado_por' => $_SESSION['user_id']
         ];
@@ -181,20 +201,53 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <textarea name="descripcion" rows="3" class="w-full rounded-md border-gray-300 shadow-sm focus:border-tjaech focus:ring-tjaech p-2 border"><?php echo htmlspecialchars($_POST['descripcion'] ?? ''); ?></textarea>
         </div>
 
-        <!-- PDF Principal Reemplazar -->
-        <div class="md:col-span-2">
-            <label class="block text-sm font-medium text-gray-700 mb-1">PDF Principal Actual</label>
-            <?php if (!empty($licitacion['pdf_principal'])): ?>
-                <div class="mb-3 p-3 bg-blue-50 border border-tjaech text-sm text-tjaech rounded flex justify-between items-center">
-                    <span>📄 <?php echo htmlspecialchars($licitacion['pdf_principal']); ?></span>
-                    <a href="<?php echo APP_URL; ?>/uploads/pdfs/<?php echo $licitacion['pdf_principal']; ?>" target="_blank" class="hover:underline font-semibold text-blue-700">Ver PDF</a>
+        <!-- Archivos PDF Reemplazar -->
+        <div class="md:col-span-2 space-y-4">
+            <h3 class="text-sm font-medium text-gray-700 border-b pb-2">Documentos Adjuntos</h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Bases -->
+                <div class="bg-gray-50 p-4 rounded border">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Bases de la Licitación</label>
+                    <?php if (!empty($licitacion['pdf_bases'])): ?>
+                        <div class="mb-3 p-2 bg-blue-50 border border-tjaech text-xs text-tjaech rounded flex justify-between items-center">
+                            <span class="truncate w-32">📄 <?php echo htmlspecialchars($licitacion['pdf_bases']); ?></span>
+                            <a href="<?php echo APP_URL; ?>/uploads/pdfs/<?php echo $licitacion['pdf_bases']; ?>" target="_blank" class="hover:underline font-semibold text-blue-700">Ver</a>
+                        </div>
+                    <?php else: ?>
+                        <div class="mb-3 text-sm text-red-500">Ningún documento subido.</div>
+                    <?php endif; ?>
+                    <input type="file" name="pdf_bases" accept=".pdf" class="block w-full text-xs text-gray-500 file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-xs file:font-medium file:bg-blue-50 file:text-tjaech hover:file:bg-blue-100 p-1 border rounded border-gray-300">
                 </div>
-            <?php else: ?>
-                <div class="mb-3 text-sm text-red-500">Ningún documento subido.</div>
-            <?php endif; ?>
 
-            <label class="block text-sm font-medium text-gray-700 mb-1 mt-4">Reemplazar PDF (Opcional)</label>
-            <input type="file" name="pdf_principal" accept=".pdf" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-tjaech hover:file:bg-blue-100 p-2 border rounded border-gray-300">
+                <!-- Presentación -->
+                <div class="bg-gray-50 p-4 rounded border">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Acta de Presentación</label>
+                    <?php if (!empty($licitacion['pdf_presentacion'])): ?>
+                        <div class="mb-3 p-2 bg-blue-50 border border-tjaech text-xs text-tjaech rounded flex justify-between items-center">
+                            <span class="truncate w-32">📄 <?php echo htmlspecialchars($licitacion['pdf_presentacion']); ?></span>
+                            <a href="<?php echo APP_URL; ?>/uploads/pdfs/<?php echo $licitacion['pdf_presentacion']; ?>" target="_blank" class="hover:underline font-semibold text-blue-700">Ver</a>
+                        </div>
+                    <?php else: ?>
+                        <div class="mb-3 text-sm text-red-500">Ningún documento subido.</div>
+                    <?php endif; ?>
+                    <input type="file" name="pdf_presentacion" accept=".pdf" class="block w-full text-xs text-gray-500 file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-xs file:font-medium file:bg-blue-50 file:text-tjaech hover:file:bg-blue-100 p-1 border rounded border-gray-300">
+                </div>
+
+                <!-- Fallo -->
+                <div class="bg-gray-50 p-4 rounded border">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Acta de Fallo</label>
+                    <?php if (!empty($licitacion['pdf_fallo'])): ?>
+                        <div class="mb-3 p-2 bg-blue-50 border border-tjaech text-xs text-tjaech rounded flex justify-between items-center">
+                            <span class="truncate w-32">📄 <?php echo htmlspecialchars($licitacion['pdf_fallo']); ?></span>
+                            <a href="<?php echo APP_URL; ?>/uploads/pdfs/<?php echo $licitacion['pdf_fallo']; ?>" target="_blank" class="hover:underline font-semibold text-blue-700">Ver</a>
+                        </div>
+                    <?php else: ?>
+                        <div class="mb-3 text-sm text-red-500">Ningún documento subido.</div>
+                    <?php endif; ?>
+                    <input type="file" name="pdf_fallo" accept=".pdf" class="block w-full text-xs text-gray-500 file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-xs file:font-medium file:bg-blue-50 file:text-tjaech hover:file:bg-blue-100 p-1 border rounded border-gray-300">
+                </div>
+            </div>
         </div>
 
         <div class="md:col-span-2 bg-gray-50 p-4 rounded-md border border-gray-200 flex items-center justify-between">
