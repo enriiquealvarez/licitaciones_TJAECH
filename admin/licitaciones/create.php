@@ -72,12 +72,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         break;
                     }
                 }
-            } else {
-                if ($estatus === 'publicado') {
-                    $error = "No puede publicar una licitación sin el archivo: $nombre_legible.";
-                    break;
-                }
             }
+        }
+    }
+
+    if (empty($error) && $estatus === 'publicado') {
+        if (empty($pdfs_subidos['pdf_bases'])) {
+            $error = "No puede publicar una licitación sin al menos las Bases de la Licitación.";
         }
     }
 

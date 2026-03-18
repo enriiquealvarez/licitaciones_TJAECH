@@ -88,8 +88,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if (empty($error) && $estatus === 'publicado') {
-        if (empty($pdfs_finales['pdf_bases']) || empty($pdfs_finales['pdf_presentacion']) || empty($pdfs_finales['pdf_fallo'])) {
-            $error = "No puede publicar una licitación sin sus 3 documentos PDF obligatorios.";
+        if (empty($pdfs_finales['pdf_bases'])) {
+            $error = "No puede publicar una licitación sin al menos las Bases de la Licitación.";
         }
     }
 
