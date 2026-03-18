@@ -3,12 +3,12 @@
 
 // Configuración de la Base de Datos
 define('DB_HOST', 'localhost');
-define('DB_USER', 'root'); // Cambiar en producción
-define('DB_PASS', '');     // Cambiar en producción
-define('DB_NAME', 'licitaciones_tjaech');
+define('DB_USER', 'tjaechgob_licitaciones_TJAECH'); // Cambiar en producción
+define('DB_PASS', '3Nr1qu3487$$**'); // Cambiar en producción
+define('DB_NAME', 'tjaechgob_licitaciones_TJAECH');
 
 // Configuración de la Aplicación
-define('APP_URL', 'http://localhost/licitaciones_TJAECH'); // Cambiar en producción a la URL pública final
+define('APP_URL', 'http://tjaech.gob.mx/licitaciones_TJAECH'); // Cambiar en producción a la URL pública final
 define('APP_NAME', 'Portal de Licitaciones TJAECH');
 
 // Directorio de subidas (asegúrate que tenga permisos de escritura por Apache)
