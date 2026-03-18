@@ -1,0 +1,16 @@
+# .htaccess principal
+Options -Indexes
+
+RewriteEngine On
+
+# Las peticiones a /admin deben ir a admin/ o dejar que Apache resuelva el subdirectorio directamente
+RewriteCond %{REQUEST_URI} ^/admin/
+RewriteRule ^ - [L]
+
+# Proteger los includes
+RewriteRule ^includes/.*$ - [F]
+
+# Ruteo principal (Slugs)
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^([a-zA-Z0-9_-]+)$ detalle.php?slug=$1 [QSA,L]
