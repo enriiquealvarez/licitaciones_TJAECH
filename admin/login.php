@@ -89,6 +89,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 Ingresar
             </button>
         </form>
+        
+        <div class="mt-6 text-center">
+            <a href="../index.php" class="text-sm text-tjaech hover:text-blue-800 flex items-center justify-center gap-2 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                Volver al Portal Público
+            </a>
+        </div>
     </div>
 
 </body>
