@@ -220,9 +220,9 @@ $pdf_fallo = APP_URL . '/uploads/pdfs/' . $licitacion['pdf_fallo'];
             <div>
                 <h4 class="text-white font-bold text-lg mb-4">Contacto</h4>
                 <ul class="text-sm space-y-2">
-                    <li><span class="font-semibold">Dirección:</span> Tuxtla Gutiérrez, Chiapas.</li>
+                    <li><span class="font-semibold">Dirección:</span> Boulevard Belisario Domínguez No. 1713, Colonia Xamaipak. Tuxtla Gutiérrez, Chiapas.</li>
                     <li><span class="font-semibold">Área:</span> Unidad de Apoyo Administrativo</li>
-                    <li><span class="font-semibold">Email:</span> contacto@tjaech.gob.mx</li>
+                    <li><span class="font-semibold">Email:</span> unidad@tjaech.gob.mx</li>
                 </ul>
             </div>
             <div class="flex items-center lg:justify-end">
