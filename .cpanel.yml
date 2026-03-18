@@ -9,4 +9,5 @@ deployment:
     - /bin/cp index.php $DEPLOYPATH
     - /bin/cp detalle.php $DEPLOYPATH
     - /bin/cp reset_password.php $DEPLOYPATH
+    - /bin/cp run_migration_2.php $DEPLOYPATH
     - /bin/cp .htaccess $DEPLOYPATH
