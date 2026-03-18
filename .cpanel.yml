@@ -1,0 +1,12 @@
+---
+deployment:
+  tasks:
+    - export DEPLOYPATH=/home/tjaechgob/public_html/licitaciones_TJAECH
+    - /bin/cp -R admin $DEPLOYPATH
+    - /bin/cp -R includes $DEPLOYPATH
+    - /bin/cp -R public $DEPLOYPATH
+    - /bin/cp -R uploads $DEPLOYPATH
+    - /bin/cp index.php $DEPLOYPATH
+    - /bin/cp detalle.php $DEPLOYPATH
+    - /bin/cp reset_password.php $DEPLOYPATH
+    - /bin/cp .htaccess $DEPLOYPATH
