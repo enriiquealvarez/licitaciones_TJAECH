@@ -14,7 +14,7 @@ class Licitacion {
         $query = "INSERT INTO " . $this->table_name . "
                   SET numero_licitacion=:num, titulo=:tit, descripcion=:desc, 
                       tipo_procedimiento=:tipo, anio=:anio, fecha_publicacion=:f_pub, 
-                      fecha_limite=:f_lim, area_responsable=:area, pdf_bases=:pdf_bases,
+                      fecha_acta_presentacion=:f_acta, area_responsable=:area, pdf_bases=:pdf_bases,
                       pdf_presentacion=:pdf_presentacion, pdf_fallo=:pdf_fallo,
                       slug=:slug, estatus=:est, creado_por=:creador";
 
@@ -26,7 +26,8 @@ class Licitacion {
         $stmt->bindParam(':tipo', $datos['tipo_procedimiento']);
         $stmt->bindParam(':anio', $datos['anio']);
         $stmt->bindParam(':f_pub', $datos['fecha_publicacion']);
-        $stmt->bindParam(':f_lim', $datos['fecha_limite']);
+        $f_acta_val = !empty($datos['fecha_acta_presentacion']) ? $datos['fecha_acta_presentacion'] : null;
+        $stmt->bindParam(':f_acta', $f_acta_val);
         $stmt->bindParam(':area', $datos['area_responsable']);
         $stmt->bindParam(':pdf_bases', $datos['pdf_bases']);
         $stmt->bindParam(':pdf_presentacion', $datos['pdf_presentacion']);
@@ -45,7 +46,7 @@ class Licitacion {
     public function actualizar($id, $datos) {
         $query = "UPDATE " . $this->table_name . "
                   SET titulo=:tit, descripcion=:desc, tipo_procedimiento=:tipo,
-                      fecha_publicacion=:f_pub, fecha_limite=:f_lim, 
+                      fecha_publicacion=:f_pub, fecha_acta_presentacion=:f_acta, 
                       area_responsable=:area, estatus=:est, actualizado_por=:actualizador";
         
         // Solo actualizar el numero, año y slug si son pasados
@@ -64,7 +65,8 @@ class Licitacion {
         $stmt->bindParam(':desc', $datos['descripcion']);
         $stmt->bindParam(':tipo', $datos['tipo_procedimiento']);
         $stmt->bindParam(':f_pub', $datos['fecha_publicacion']);
-        $stmt->bindParam(':f_lim', $datos['fecha_limite']);
+        $f_acta_val = !empty($datos['fecha_acta_presentacion']) ? $datos['fecha_acta_presentacion'] : null;
+        $stmt->bindParam(':f_acta', $f_acta_val);
         $stmt->bindParam(':area', $datos['area_responsable']);
         $stmt->bindParam(':est', $datos['estatus']);
         $stmt->bindParam(':actualizador', $datos['actualizado_por']);

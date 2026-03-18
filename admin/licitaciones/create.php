@@ -23,12 +23,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $tipo_procedimiento = clean($_POST['tipo_procedimiento']);
     $anio = intval($_POST['anio']);
     $fecha_publicacion = clean($_POST['fecha_publicacion']);
-    $fecha_limite = clean($_POST['fecha_limite']);
+    $fecha_acta_presentacion = clean($_POST['fecha_acta_presentacion'] ?? '');
     $area_responsable = clean($_POST['area_responsable']);
     $estatus = clean($_POST['estatus']); // borrador o publicado
 
     // Validar requeridos
-    if (empty($numero_licitacion) || empty($titulo) || empty($tipo_procedimiento) || empty($anio) || empty($fecha_publicacion) || empty($fecha_limite) || empty($area_responsable)) {
+    if (empty($numero_licitacion) || empty($titulo) || empty($tipo_procedimiento) || empty($anio) || empty($fecha_publicacion) || empty($area_responsable)) {
         $error = "Todos los campos obligatorios deben estar llenos.";
     } elseif ($licitacionObj->existeNumero($numero_licitacion)) {
         $error = "El número de licitación ya existe en el sistema.";
@@ -99,7 +99,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'tipo_procedimiento' => $tipo_procedimiento,
             'anio' => $anio,
             'fecha_publicacion' => $fecha_publicacion,
-            'fecha_limite' => $fecha_limite,
+            'fecha_acta_presentacion' => $fecha_acta_presentacion,
             'area_responsable' => $area_responsable,
             'pdf_bases' => $pdfs_subidos['pdf_bases'],
             'pdf_presentacion' => $pdfs_subidos['pdf_presentacion'],
@@ -165,7 +165,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <option value="Licitación Pública Estatal">Licitación Pública Estatal</option>
                 <option value="Licitación Pública Nacional">Licitación Pública Nacional</option>
                 <option value="Invitación Restringida a Tres Proveedores">Invitación Restringida a Tres Proveedores</option>
-                <option value="Adjudicación Directa">Adjudicación Directa</option>
             </select>
         </div>
 
@@ -181,8 +180,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <input type="date" name="fecha_publicacion" required class="w-full rounded-md border-gray-300 shadow-sm focus:border-tjaech focus:ring-tjaech p-2 border" value="<?php echo htmlspecialchars($_POST['fecha_publicacion'] ?? date('Y-m-d')); ?>">
         </div>
         <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Fecha Límite para Bases/Apertura *</label>
-            <input type="date" name="fecha_limite" required class="w-full rounded-md border-gray-300 shadow-sm focus:border-tjaech focus:ring-tjaech p-2 border" value="<?php echo htmlspecialchars($_POST['fecha_limite'] ?? ''); ?>">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Día del Acta de Presentación</label>
+            <input type="date" name="fecha_acta_presentacion" class="w-full rounded-md border-gray-300 shadow-sm focus:border-tjaech focus:ring-tjaech p-2 border" value="<?php echo htmlspecialchars($_POST['fecha_acta_presentacion'] ?? ''); ?>">
+            <p class="text-xs text-gray-500 mt-1">Opcional. Se puede agregar posteriormente.</p>
         </div>
 
         <!-- Descripción -->

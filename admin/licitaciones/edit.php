@@ -33,11 +33,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $tipo_procedimiento = clean($_POST['tipo_procedimiento']);
     $anio = intval($_POST['anio']);
     $fecha_publicacion = clean($_POST['fecha_publicacion']);
-    $fecha_limite = clean($_POST['fecha_limite']);
+    $fecha_acta_presentacion = clean($_POST['fecha_acta_presentacion'] ?? '');
     $area_responsable = clean($_POST['area_responsable']);
     $estatus = clean($_POST['estatus']);
 
-    if (empty($numero_licitacion) || empty($titulo) || empty($tipo_procedimiento) || empty($anio) || empty($fecha_publicacion) || empty($fecha_limite) || empty($area_responsable)) {
+    if (empty($numero_licitacion) || empty($titulo) || empty($tipo_procedimiento) || empty($anio) || empty($fecha_publicacion) || empty($area_responsable)) {
         $error = "Todos los campos obligatorios deben estar llenos.";
     } elseif ($numero_licitacion !== $licitacion['numero_licitacion'] && $licitacionObj->existeNumero($numero_licitacion, $id)) {
         $error = "El número de licitación ya existe en el sistema en otro registro.";
@@ -54,6 +54,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'pdf_presentacion' => $licitacion['pdf_presentacion'],
         'pdf_fallo' => $licitacion['pdf_fallo']
     ];
+    
+    // Procesar eliminación de archivos
+    foreach ($archivos_pdf as $campo => $nombre_legible) {
+        if (isset($_POST['eliminar_' . $campo]) && $_POST['eliminar_' . $campo] === '1') {
+            if (!empty($licitacion[$campo]) && file_exists(UPLOAD_DIR . $licitacion[$campo])) {
+                unlink(UPLOAD_DIR . $licitacion[$campo]);
+            }
+            $pdfs_finales[$campo] = '';
+        }
+    }
     
     // Procesar nuevos archivos si se suben
     if (empty($error)) {
@@ -101,7 +111,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'tipo_procedimiento' => $tipo_procedimiento,
             'anio' => $anio,
             'fecha_publicacion' => $fecha_publicacion,
-            'fecha_limite' => $fecha_limite,
+            'fecha_acta_presentacion' => $fecha_acta_presentacion,
             'area_responsable' => $area_responsable,
             'pdf_bases' => $pdfs_finales['pdf_bases'],
             'pdf_presentacion' => $pdfs_finales['pdf_presentacion'],
@@ -177,7 +187,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <option value="Licitación Pública Estatal">Licitación Pública Estatal</option>
                 <option value="Licitación Pública Nacional">Licitación Pública Nacional</option>
                 <option value="Invitación Restringida a Tres Proveedores">Invitación Restringida a Tres Proveedores</option>
-                <option value="Adjudicación Directa">Adjudicación Directa</option>
             </select>
         </div>
 
@@ -192,8 +201,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
 
         <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Fecha Límite *</label>
-            <input type="date" name="fecha_limite" required class="w-full rounded-md border-gray-300 shadow-sm focus:border-tjaech focus:ring-tjaech p-2 border" value="<?php echo htmlspecialchars($_POST['fecha_limite'] ?? ''); ?>">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Día del Acta de Presentación</label>
+            <input type="date" name="fecha_acta_presentacion" class="w-full rounded-md border-gray-300 shadow-sm focus:border-tjaech focus:ring-tjaech p-2 border" value="<?php echo htmlspecialchars($_POST['fecha_acta_presentacion'] ?? ''); ?>">
         </div>
 
         <div class="md:col-span-2">
@@ -210,9 +219,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div class="bg-gray-50 p-4 rounded border">
                     <label class="block text-sm font-medium text-gray-700 mb-2">Bases de la Licitación</label>
                     <?php if (!empty($licitacion['pdf_bases'])): ?>
-                        <div class="mb-3 p-2 bg-blue-50 border border-tjaech text-xs text-tjaech rounded flex justify-between items-center">
-                            <span class="truncate w-32">📄 <?php echo htmlspecialchars($licitacion['pdf_bases']); ?></span>
-                            <a href="<?php echo APP_URL; ?>/uploads/pdfs/<?php echo $licitacion['pdf_bases']; ?>" target="_blank" class="hover:underline font-semibold text-blue-700">Ver</a>
+                        <div class="mb-3 p-2 bg-blue-50 border border-tjaech text-xs text-tjaech rounded flex flex-col space-y-2">
+                            <div class="flex justify-between items-center">
+                                <span class="truncate w-32">📄 <?php echo htmlspecialchars($licitacion['pdf_bases']); ?></span>
+                                <a href="<?php echo APP_URL; ?>/uploads/pdfs/<?php echo $licitacion['pdf_bases']; ?>" target="_blank" class="hover:underline font-semibold text-blue-700">Ver</a>
+                            </div>
+                            <label class="inline-flex items-center">
+                                <input type="checkbox" name="eliminar_pdf_bases" value="1" class="form-checkbox h-4 w-4 text-red-600">
+                                <span class="ml-2 text-xs text-red-600 font-medium cursor-pointer">Eliminar documento</span>
+                            </label>
                         </div>
                     <?php else: ?>
                         <div class="mb-3 text-sm text-red-500">Ningún documento subido.</div>
@@ -224,9 +239,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div class="bg-gray-50 p-4 rounded border">
                     <label class="block text-sm font-medium text-gray-700 mb-2">Acta de Presentación</label>
                     <?php if (!empty($licitacion['pdf_presentacion'])): ?>
-                        <div class="mb-3 p-2 bg-blue-50 border border-tjaech text-xs text-tjaech rounded flex justify-between items-center">
-                            <span class="truncate w-32">📄 <?php echo htmlspecialchars($licitacion['pdf_presentacion']); ?></span>
-                            <a href="<?php echo APP_URL; ?>/uploads/pdfs/<?php echo $licitacion['pdf_presentacion']; ?>" target="_blank" class="hover:underline font-semibold text-blue-700">Ver</a>
+                        <div class="mb-3 p-2 bg-blue-50 border border-tjaech text-xs text-tjaech rounded flex flex-col space-y-2">
+                            <div class="flex justify-between items-center">
+                                <span class="truncate w-32">📄 <?php echo htmlspecialchars($licitacion['pdf_presentacion']); ?></span>
+                                <a href="<?php echo APP_URL; ?>/uploads/pdfs/<?php echo $licitacion['pdf_presentacion']; ?>" target="_blank" class="hover:underline font-semibold text-blue-700">Ver</a>
+                            </div>
+                            <label class="inline-flex items-center">
+                                <input type="checkbox" name="eliminar_pdf_presentacion" value="1" class="form-checkbox h-4 w-4 text-red-600">
+                                <span class="ml-2 text-xs text-red-600 font-medium cursor-pointer">Eliminar documento</span>
+                            </label>
                         </div>
                     <?php else: ?>
                         <div class="mb-3 text-sm text-red-500">Ningún documento subido.</div>
@@ -238,9 +259,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div class="bg-gray-50 p-4 rounded border">
                     <label class="block text-sm font-medium text-gray-700 mb-2">Acta de Fallo</label>
                     <?php if (!empty($licitacion['pdf_fallo'])): ?>
-                        <div class="mb-3 p-2 bg-blue-50 border border-tjaech text-xs text-tjaech rounded flex justify-between items-center">
-                            <span class="truncate w-32">📄 <?php echo htmlspecialchars($licitacion['pdf_fallo']); ?></span>
-                            <a href="<?php echo APP_URL; ?>/uploads/pdfs/<?php echo $licitacion['pdf_fallo']; ?>" target="_blank" class="hover:underline font-semibold text-blue-700">Ver</a>
+                        <div class="mb-3 p-2 bg-blue-50 border border-tjaech text-xs text-tjaech rounded flex flex-col space-y-2">
+                            <div class="flex justify-between items-center">
+                                <span class="truncate w-32">📄 <?php echo htmlspecialchars($licitacion['pdf_fallo']); ?></span>
+                                <a href="<?php echo APP_URL; ?>/uploads/pdfs/<?php echo $licitacion['pdf_fallo']; ?>" target="_blank" class="hover:underline font-semibold text-blue-700">Ver</a>
+                            </div>
+                            <label class="inline-flex items-center">
+                                <input type="checkbox" name="eliminar_pdf_fallo" value="1" class="form-checkbox h-4 w-4 text-red-600">
+                                <span class="ml-2 text-xs text-red-600 font-medium cursor-pointer">Eliminar documento</span>
+                            </label>
                         </div>
                     <?php else: ?>
                         <div class="mb-3 text-sm text-red-500">Ningún documento subido.</div>

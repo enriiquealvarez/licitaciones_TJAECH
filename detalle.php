@@ -105,10 +105,12 @@ $pdf_fallo = APP_URL . '/uploads/pdfs/' . $licitacion['pdf_fallo'];
                                 <span class="block text-gray-500 font-medium">Publicación</span>
                                 <span class="text-gray-900"><?php echo date('d / m / Y', strtotime($licitacion['fecha_publicacion'])); ?></span>
                             </div>
+                            <?php if (!empty($licitacion['fecha_acta_presentacion'])): ?>
                             <div>
-                                <span class="block text-gray-500 font-medium">Fecha Límite</span>
-                                <span class="text-red-600 font-semibold"><?php echo date('d / m / Y', strtotime($licitacion['fecha_limite'])); ?></span>
+                                <span class="block text-gray-500 font-medium">Acta de Presentación</span>
+                                <span class="text-tjaech font-medium"><?php echo date('d / m / Y', strtotime($licitacion['fecha_acta_presentacion'])); ?></span>
                             </div>
+                            <?php endif; ?>
                         </div>
 
                         <div class="border-t border-gray-100 pt-4">
@@ -128,34 +130,43 @@ $pdf_fallo = APP_URL . '/uploads/pdfs/' . $licitacion['pdf_fallo'];
                 <div class="space-y-4 mt-auto">
                     <div class="bg-blue-50 p-4 rounded-lg shadow-sm border border-blue-100 flex flex-col hover:bg-blue-100 transition">
                         <h4 class="font-bold text-tjaech text-sm mb-1">Bases de la Licitación</h4>
-                        <div class="flex justify-between items-center text-sm">
-                            <button onclick="setPdfViewer('<?php echo $pdf_bases; ?>', 'Bases de la Licitación')" class="text-blue-700 hover:underline font-medium">Ver en línea</button>
-                            <a href="<?php echo $pdf_bases; ?>" download class="text-gray-600 hover:text-black font-semibold flex items-center">
-                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                                Descargar
-                            </a>
+                        <div class="flex flex-col space-y-2 mt-2">
+                            <div class="flex justify-between items-center text-sm">
+                                <button onclick="setPdfViewer('<?php echo $pdf_bases; ?>', 'Bases de la Licitación')" class="text-blue-700 hover:underline font-medium flex items-center"><svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg> Ver aquí</button>
+                                <a href="<?php echo $pdf_bases; ?>" target="_blank" class="text-blue-700 hover:underline font-medium flex items-center"><svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg> Pestaña</a>
+                            </div>
+                            <div class="flex justify-between items-center text-sm border-t border-blue-200 pt-2">
+                                <button onclick="copiarAlPortapapeles('<?php echo $pdf_bases; ?>')" class="text-gray-600 hover:text-black font-semibold flex items-center" title="Copiar URL para compartir"><svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg> Copiar URL</button>
+                                <a href="<?php echo $pdf_bases; ?>" download class="text-gray-600 hover:text-black font-semibold flex items-center"><svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg> Descargar</a>
+                            </div>
                         </div>
                     </div>
 
                     <div class="bg-blue-50 p-4 rounded-lg shadow-sm border border-blue-100 flex flex-col hover:bg-blue-100 transition">
                         <h4 class="font-bold text-tjaech text-sm mb-1">Acta de Presentación</h4>
-                        <div class="flex justify-between items-center text-sm">
-                            <button onclick="setPdfViewer('<?php echo $pdf_presentacion; ?>', 'Acta de Presentación de Propuestas')" class="text-blue-700 hover:underline font-medium">Ver en línea</button>
-                            <a href="<?php echo $pdf_presentacion; ?>" download class="text-gray-600 hover:text-black font-semibold flex items-center">
-                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                                Descargar
-                            </a>
+                        <div class="flex flex-col space-y-2 mt-2">
+                            <div class="flex justify-between items-center text-sm">
+                                <button onclick="setPdfViewer('<?php echo $pdf_presentacion; ?>', 'Acta de Presentación')" class="text-blue-700 hover:underline font-medium flex items-center"><svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg> Ver aquí</button>
+                                <a href="<?php echo $pdf_presentacion; ?>" target="_blank" class="text-blue-700 hover:underline font-medium flex items-center"><svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg> Pestaña</a>
+                            </div>
+                            <div class="flex justify-between items-center text-sm border-t border-blue-200 pt-2">
+                                <button onclick="copiarAlPortapapeles('<?php echo $pdf_presentacion; ?>')" class="text-gray-600 hover:text-black font-semibold flex items-center" title="Copiar URL para compartir"><svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg> Copiar URL</button>
+                                <a href="<?php echo $pdf_presentacion; ?>" download class="text-gray-600 hover:text-black font-semibold flex items-center"><svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg> Descargar</a>
+                            </div>
                         </div>
                     </div>
 
                     <div class="bg-blue-50 p-4 rounded-lg shadow-sm border border-blue-100 flex flex-col hover:bg-blue-100 transition">
                         <h4 class="font-bold text-tjaech text-sm mb-1">Acta de Fallo</h4>
-                        <div class="flex justify-between items-center text-sm">
-                            <button onclick="setPdfViewer('<?php echo $pdf_fallo; ?>', 'Acta de Fallo')" class="text-blue-700 hover:underline font-medium">Ver en línea</button>
-                            <a href="<?php echo $pdf_fallo; ?>" download class="text-gray-600 hover:text-black font-semibold flex items-center">
-                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                                Descargar
-                            </a>
+                        <div class="flex flex-col space-y-2 mt-2">
+                            <div class="flex justify-between items-center text-sm">
+                                <button onclick="setPdfViewer('<?php echo $pdf_fallo; ?>', 'Acta de Fallo')" class="text-blue-700 hover:underline font-medium flex items-center"><svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg> Ver aquí</button>
+                                <a href="<?php echo $pdf_fallo; ?>" target="_blank" class="text-blue-700 hover:underline font-medium flex items-center"><svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg> Pestaña</a>
+                            </div>
+                            <div class="flex justify-between items-center text-sm border-t border-blue-200 pt-2">
+                                <button onclick="copiarAlPortapapeles('<?php echo $pdf_fallo; ?>')" class="text-gray-600 hover:text-black font-semibold flex items-center" title="Copiar URL para compartir"><svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg> Copiar URL</button>
+                                <a href="<?php echo $pdf_fallo; ?>" download class="text-gray-600 hover:text-black font-semibold flex items-center"><svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg> Descargar</a>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -187,6 +198,13 @@ $pdf_fallo = APP_URL . '/uploads/pdfs/' . $licitacion['pdf_fallo'];
                     document.getElementById('viewer-title').innerHTML = '<svg class="w-5 h-5 text-red-500 mr-2 inline" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd"></path></svg> ' + title;
                     document.getElementById('viewer-new-tab').href = url;
                     document.getElementById('pdf-fallback').href = url;
+                }
+                function copiarAlPortapapeles(texto) {
+                    navigator.clipboard.writeText(texto).then(function() {
+                        alert('URL copiada al portapapeles exitosamente:\n' + texto);
+                    }, function(err) {
+                        alert('Error al copiar: ' + err);
+                    });
                 }
             </script>
         </div>

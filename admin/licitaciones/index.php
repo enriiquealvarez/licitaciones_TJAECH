@@ -55,7 +55,9 @@ $licitaciones = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         <div>Pub: <?php echo date('d/m/Y', strtotime($lic['fecha_publicacion'])); ?></div>
-                        <div class="text-red-500 font-medium mt-1">Lím: <?php echo date('d/m/Y', strtotime($lic['fecha_limite'])); ?></div>
+                        <?php if (!empty($lic['fecha_acta_presentacion'])): ?>
+                            <div class="text-gray-700 font-medium mt-1">Acta: <?php echo date('d/m/Y', strtotime($lic['fecha_acta_presentacion'])); ?></div>
+                        <?php endif; ?>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm">
                         <?php if ($lic['estatus'] === 'publicado'): ?>

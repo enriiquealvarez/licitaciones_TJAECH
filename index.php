@@ -21,8 +21,7 @@ $anios = range(date('Y'), 2020);
 $tipos_procedimiento = [
     'Licitación Pública Estatal',
     'Licitación Pública Nacional',
-    'Invitación Restringida a Tres Proveedores',
-    'Adjudicación Directa'
+    'Invitación Restringida a Tres Proveedores'
 ];
 ?>
 <!DOCTYPE html>
@@ -137,7 +136,9 @@ $tipos_procedimiento = [
                                     <span class="mx-2 text-gray-300">|</span> 
                                     <strong>Publicación:</strong> <?php echo date('d/m/Y', strtotime($lic['fecha_publicacion'])); ?>
                                     <span class="mx-2 text-gray-300">|</span> 
-                                    <strong>Límite:</strong> <span class="text-red-600 font-medium"><?php echo date('d/m/Y', strtotime($lic['fecha_limite'])); ?></span>
+                                    <?php if (!empty($lic['fecha_acta_presentacion'])): ?>
+                                        <strong>Acta:</strong> <span class="text-gray-900 font-medium"><?php echo date('d/m/Y', strtotime($lic['fecha_acta_presentacion'])); ?></span>
+                                    <?php endif; ?>
                                 </p>
                             </div>
                             <div class="shrink-0 flex items-center">
